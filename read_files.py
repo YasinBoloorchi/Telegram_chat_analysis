@@ -51,4 +51,7 @@ def send_file(file_bytes):
 
     client_socket.send(sending_message)
 
+    result = client_socket.recv(100)
+    print(result.decode('utf-8'))
+
 send_file(file_bytes)
