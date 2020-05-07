@@ -1,6 +1,8 @@
 from os import walk
+import socket
 import pickle
 import re
+import sys
 
 
 def get_files_address(path):
@@ -37,8 +39,16 @@ print("list files len: ",len(pickle.loads(file_bytes)))
 def send_file(file_bytes):
     HEADER_SIZE = 10
     header = f"{len(file_bytes):^ {HEADER_SIZE}}".encode('utf-8')
-    message = header + file_bytes
+    sending_message = header + file_bytes
 
     print(f"message: [|{header.decode('utf-8')}|{str(type(file_bytes))}]")
+
+    IP = "127.0.0.1"
+    PORT = 1235
+
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((IP, PORT))
+
+    client_socket.send(sending_message)
 
 send_file(file_bytes)
