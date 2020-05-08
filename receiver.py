@@ -1,4 +1,4 @@
-#!/usr/bin/python3.6
+#!/usr/bin/python3.8
 
 import socket
 import pickle
@@ -15,7 +15,7 @@ server_socket.listen()
 
 BUFFER_SIZE = 1000000
 
-def send_file(file_bytes, client_socket):
+def send_to_parser(file_bytes):
     HEADER_SIZE = 10
     header = f"{len(file_bytes):^ {HEADER_SIZE}}".encode('utf-8')
     sending_message = header + file_bytes
@@ -31,12 +31,6 @@ def send_file(file_bytes, client_socket):
 
     print('sending file to the Parser...')
     parser_socket.send(sending_message)
-
-
-    print(client_socket)
-    print(type(client_socket))
-    print(pickle.dumps(str(client_socket)))
-    test_socke = socket.socket(socket.AF_INET , socket.SOCK_STREAM, proto=0, )
     
     # client_socket.send(client_socket_bytes)
 
@@ -67,9 +61,9 @@ while True:
             client_socket.send(b'Files received!')
             break
     
-    
+
     # send data to the parser
-    send_file(data, client_socket)
+    send_to_parser(data)
 
     # TODO
     # wait for the analysis result

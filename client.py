@@ -1,4 +1,4 @@
-#!/usr/bin/python3.6
+#!/usr/bin/python3.8
 
 from os import walk
 import socket
@@ -22,7 +22,7 @@ def files_to_bytes(address_list):
     file_list = []
     for addr in address_list:
         file = open(addr, 'r')
-        file_list += file.readlines()
+        file_list.append(file.readlines())
         print(type(file_list), len(file_list))
         file.close()
 
@@ -48,8 +48,8 @@ def send_file(file_bytes):
     result = client_socket.recv(100)
     print(result.decode('utf-8'))
 
-# path = '/home/hakim/server_chat'
-path = '/home/hakim/Documents/telegram chat'
+path = '/home/hakim/server_chat'
+# path = '/home/hakim/Documents/telegram chat'
 
 addresses = get_files_address(path)
 print('addresses: \n', addresses)
@@ -59,5 +59,3 @@ print("list files len: ",len(pickle.loads(file_bytes)))
 
 send_file(file_bytes)
 
-
-    

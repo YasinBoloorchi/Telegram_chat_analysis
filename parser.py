@@ -1,7 +1,8 @@
-#!/usr/bin/python3.6
+#!/usr/bin/python3.8
 
 import socket
 import pickle
+from bs4 import BeautifulSoup
 
 
 def send_file(file_bytes):
@@ -38,6 +39,52 @@ server_socket.listen()
 
 BUFFER_SIZE = 1000000
 
+
+def parsing(data):
+    msg_id = 1
+    main_dict = {}
+    for file in data:
+        # for each file/list that we received we make 
+        # an html file
+        html_file = open('./chatfile.html', 'w')
+        html_file.writelines(file)
+        html_file.close()
+
+        # then we open that file and soup it
+        html_file = open('./chatfile.html', 'r')
+        bmf = BeautifulSoup(html_file, 'html.parser')
+        print(type(bmf))
+        html_file.close()
+
+        html_file = open('./chatfile.html', 'w')
+        html_file.write('')
+        html_file.close()
+
+
+
+        all_messages = bmf.find_all('div', attrs={'class':'message default clearfix'})
+
+        for d in all_messages:
+            text_tag = d.find_all('div', attrs={'class':'text'})
+            from_tag = d.find_all('div', attrs={'class':'from_name'})
+            time_tag = d.find_all('div', attrs={'class':'pull_right date details'})[0]['title']
+
+            try:
+                plain_time = str(time_tag).replace('\n','')
+                plain_text = str(text_tag[0].string).replace('\n','')
+                plain_from = str(from_tag[0].string).replace('\n','')
+
+                print('-'*30)
+                print(plain_from, '-->', plain_text, 'T: ', plain_time )
+
+                main_dict[msg_id] = {'text':plain_text , 'from':plain_from, 'time':plain_time}
+                msg_id += 1
+            except:
+                pass
+    
+    return main_dict
+
+
 while True:
     print('Parser is listening..')
     receiver_socket, receiver_address = server_socket.accept()
@@ -69,6 +116,7 @@ while True:
 
     # TODO 
     # Pars File
+    parsed_data = parsing(data)
 
     # TODO 
     # send file to the tokenizer
