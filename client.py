@@ -1,9 +1,10 @@
+#!/usr/bin/python3.6
+
 from os import walk
 import socket
 import pickle
 import re
 import sys
-
 
 def get_files_address(path):
     files_addresses = []
@@ -17,11 +18,6 @@ def get_files_address(path):
 
     return files_addresses
 
-
-addresses = get_files_address('/home/hakim/server_chat')
-print('addresses: \n', addresses)
-
-
 def files_to_bytes(address_list):
     file_list = []
     for addr in address_list:
@@ -31,10 +27,6 @@ def files_to_bytes(address_list):
         file.close()
 
     return pickle.dumps(file_list)
-
-
-file_bytes = files_to_bytes(addresses)
-print("list files len: ",len(pickle.loads(file_bytes)))
 
 def send_file(file_bytes):
     HEADER_SIZE = 10
@@ -49,9 +41,23 @@ def send_file(file_bytes):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((IP, PORT))
 
+    print('sending file to the server...')
     client_socket.send(sending_message)
+    print('file sent to the server!')
 
     result = client_socket.recv(100)
     print(result.decode('utf-8'))
 
+# path = '/home/hakim/server_chat'
+path = '/home/hakim/Documents/telegram chat'
+
+addresses = get_files_address(path)
+print('addresses: \n', addresses)
+
+file_bytes = files_to_bytes(addresses)
+print("list files len: ",len(pickle.loads(file_bytes)))
+
 send_file(file_bytes)
+
+
+    
