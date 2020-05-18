@@ -2,6 +2,7 @@
 
 import socket
 import pickle
+from datetime import datetime
 
 HEADER_LENGTH = 10
 
@@ -32,9 +33,8 @@ def send_to_parser(file_bytes):
     print('sending file to the Parser...')
     parser_socket.send(sending_message)
     
-    # client_socket.send(client_socket_bytes)
-
-    print('file sent to the Parser!')
+    ack = parser_socket.recv(50)
+    print('ACK: ',ack.decode('utf-8'))
 
 
 while True:
@@ -49,6 +49,7 @@ while True:
         msg = client_socket.recv(BUFFER_SIZE)
 
         if new_msg:
+            print(f'New message receiving! | TIME: {datetime.now()}')
             print(f'new message length: {msg[:HEADER_LENGTH].decode("utf-8")}')
             msglen = int(msg[:HEADER_LENGTH])
             new_msg = False
@@ -56,12 +57,11 @@ while True:
         data += msg
 
         if len(data) - HEADER_LENGTH == msglen:
-            print("full msg recvd")
+            print("Message received completely")
             data = data[HEADER_LENGTH:]
             client_socket.send(b'Files received!')
             break
     
-
     # send data to the parser
     send_to_parser(data)
 
