@@ -42,19 +42,25 @@ def send_to_analysis(file_bytes):
 
 # TODO 
 # create a stop word checker program
-def is_stop_word(word):
-
-    stop_words = ['این', 'و', 'در', 'با', 'اون', 'برای', 'از']
-    if word in stop_words:
-        return True
+def is_stop_word(word, is_stop_socket):
+    word_byte = pickle.dumps(word)
     
-    else:
-        return False
+    is_stop_socket.send(word_byte)
+    print(f"send word '{word}' to is_stop")
+    res = is_stop_socket.recv(10)
     
+    return pickle.loads(res)
 
 
 def tokenize(parsed_dictionary):
-    
+    # Connect to stop word
+    IP = "127.0.0.1"
+    PORT = 9876
+
+    is_stop_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    is_stop_socket.connect((IP, PORT))
+
+
     Invert_index = {}
     for DID in parsed_dictionary:
         doc = parsed_dictionary[DID]
@@ -65,9 +71,10 @@ def tokenize(parsed_dictionary):
         # add a stemmer function 
         stemmed_words = []
         for word in text:
-            if not is_stop_word(word):
+            if not is_stop_word(word, is_stop_socket):
                 stemmed_words.append(word)
 
+        print('length of stemmed word: ',len(stemmed_words))
         for word in stemmed_words:
             if word not in Invert_index:
                 Invert_index[word] = {'DocIDs':[DID], 'DocTF': { DID : 1 }, 'DF' : 1 }
@@ -81,6 +88,8 @@ def tokenize(parsed_dictionary):
                 elif DID in Invert_index[word]['DocIDs']:
                     Invert_index[word]['DocTF'][DID] += 1
     
+    is_stop_socket.send(pickle.dumps('END'))
+    print(len(Invert_index))
     return Invert_index
     
 
@@ -117,13 +126,12 @@ while True:
 
     # TODO
     inv_indx = tokenize(data)
-    print('Inver Index Created.\nwidth:', len(inv_indx))
+    # print('Inver Index Created.\nwidth:', len(inv_indx))
 
-    # for word in inv_indx:
-    #     df = inv_indx[word]['DF']
-    #     if int(df) > 10:
-    #         print(word, '-'*10, '>', inv_indx[word]['DF'])
-
+    for word_id in inv_indx:
+        df = inv_indx[word_id]['DF']
+        if int(df) > 10:
+            print(word_id, df)
 
     # TODO
     # send_to_analysis(pickle.dumps(inv_indx))
