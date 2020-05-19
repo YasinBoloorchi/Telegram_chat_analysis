@@ -16,7 +16,16 @@ server_socket.listen()
 
 BUFFER_SIZE = 1000
 
-stop_words = ['این', 'و', 'در', 'با', 'اون', 'برای', 'از', 'که', 'هر']
+# Read stop words from .stop_words.txt
+stop_words_file = open('./.stop_words.txt', 'r')
+
+stop_words_lines = stop_words_file.readlines()
+stop_words = list(map( (lambda word: word.split('\n')[0] ) , stop_words_lines))
+
+stop_words_file.close()
+
+
+
 def is_stop_word(word):
     if word in stop_words:
         print(f'{word} IS STOP WORD')
