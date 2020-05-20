@@ -1,10 +1,13 @@
-#!/usr/bin/python3.8
+#!/usr/bin/python3.6
 
 from os import walk
 import socket
 import pickle
 import re
 import sys
+import numpy
+import pandas
+import cv2
 
 def get_files_address(path):
     files_addresses = []
@@ -45,11 +48,41 @@ def send_file(file_bytes):
     client_socket.send(sending_message)
     print('file sent to the server!')
 
-    result = client_socket.recv(100)
-    print(result.decode('utf-8'))
+    # ack = client_socket.recv(30)
+    # print(ack.decode('utf-8'))
+
+
+    print('Waiting for the result')
+    # HEADER_LENGTH = 10
+    # BUFFER_SIZE = 19000000
+    BUFFER_SIZE = 1000000
+
+    data = b''
+    new_msg = True
+    # data = client_socket.recv(BUFFER_SIZE)
+
+    while True:
+        msg = client_socket.recv(BUFFER_SIZE)
+
+        if new_msg:
+            print(f'new message length: {msg[:HEADER_SIZE].decode("utf-8")}')
+            msglen = int(msg[:HEADER_SIZE])
+            new_msg = False
+
+        data += msg
+
+        if len(data) - HEADER_SIZE == msglen:
+            print("Result received completely")
+            data = data[HEADER_SIZE:]
+            break
+
+    # return the result
+    return pickle.loads(data)
 
 path = '/home/hakim/server_chat'
 # path = '/home/hakim/Documents/telegram chat'
+# path = '/home/hakim/kkd_chat_history'
+# path = '/home/hakim/family'
 
 addresses = get_files_address(path)
 print('addresses: \n', addresses)
@@ -57,5 +90,15 @@ print('addresses: \n', addresses)
 file_bytes = files_to_bytes(addresses)
 print("list files len: ",len(pickle.loads(file_bytes)))
 
-send_file(file_bytes)
+result_file = send_file(file_bytes)
+
+print(type(result_file))
+
+while True:
+    cv2.imshow('plot image', result_file)
+
+    key = cv2.waitKey(20)
+    if key == 27: # exit on ESC
+        break
+    
 
