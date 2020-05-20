@@ -1,4 +1,4 @@
-#!/usr/bin/python3.8
+#!/usr/bin/python3.6
 
 import socket
 import pickle
@@ -14,7 +14,7 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((IP, PORT))
 server_socket.listen()
 
-BUFFER_SIZE = 1000
+BUFFER_SIZE = 100000
 
 # Read stop words from .stop_words.txt
 stop_words_file = open('./.stop_words.txt', 'r')
@@ -41,7 +41,7 @@ while True:
     print(f"Connection from {tokenizer_address} has been stablished!")
 
     while True:
-        msg = tokenizer_socket.recv(100)
+        msg = tokenizer_socket.recv(100000)
         
         data = pickle.loads(msg)
         

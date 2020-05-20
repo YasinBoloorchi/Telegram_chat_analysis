@@ -1,4 +1,4 @@
-#!/usr/bin/python3.8
+#!/usr/bin/python3.6
 
 import socket
 import pickle
@@ -27,7 +27,7 @@ def send_to_analysis(file_bytes):
 
     # analysis IP and PORT
     IP = "127.0.0.1"
-    PORT = 2341
+    PORT = 7654
 
     analysis_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     analysis_socket.connect((IP, PORT))
@@ -40,14 +40,12 @@ def send_to_analysis(file_bytes):
     print('file sent to the analysis!')
 
 
-# TODO 
-# create a stop word checker program
 def is_stop_word(word, is_stop_socket):
     word_byte = pickle.dumps(word)
     
     is_stop_socket.send(word_byte)
     print(f"send word '{word}' to is_stop")
-    res = is_stop_socket.recv(10)
+    res = is_stop_socket.recv(100)
     
     return pickle.loads(res)
 
@@ -71,7 +69,7 @@ def tokenize(parsed_dictionary):
         # add a stemmer function 
         stemmed_words = []
         for word in text:
-            if not is_stop_word(word, is_stop_socket):
+            if not is_stop_word(word, is_stop_socket) and len(word) > 0:
                 stemmed_words.append(word)
 
         print('length of stemmed word: ',len(stemmed_words))
@@ -128,10 +126,17 @@ while True:
     inv_indx = tokenize(data)
     # print('Inver Index Created.\nwidth:', len(inv_indx))
 
-    for word_id in inv_indx:
-        df = inv_indx[word_id]['DF']
-        if int(df) > 10:
-            print(word_id, df)
+    # doc_info = {}
+    # for doc_id in data:
+    #     doc_info[doc_id] = {'from': data[doc_id]['from'], 'time': data[doc_id]['time']}
+
+    for doc_id in data:
+        del data[doc_id]['text']
+            
+    print(data[1])
+    print(data[200])
+
+    inv_indx_W_doc_id = [inv_indx, data]
 
     # TODO
-    # send_to_analysis(pickle.dumps(inv_indx))
+    send_to_analysis(pickle.dumps(inv_indx_W_doc_id))

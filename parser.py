@@ -1,4 +1,4 @@
-#!/usr/bin/python3.8
+#!/usr/bin/python3.6
 
 import socket
 import pickle
@@ -116,6 +116,7 @@ while True:
 
     # print(type(data))
     data = pickle.loads(data)
+    
     print('data class: ',type(data), '-- data length:' ,len(data))
 
     # TODO 
