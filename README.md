@@ -36,5 +36,5 @@ For installing this project, first you need to download it and put it on 5 diffe
 
 ## Example
 
-![Example](/home/hakim/Documents/python_programing/Server Project/plot_images/2020-06-07 12:39:53.959843.png)
+![Example](https://img.techpowerup.org/200607/2020-06-07-19-18-40-850653.png)
 
