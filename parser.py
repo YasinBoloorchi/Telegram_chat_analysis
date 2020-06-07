@@ -15,6 +15,38 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+def get_config(address):
+    config_file = open("./.config")
+    config = config_file.readlines()
+    config_file.close()
+
+    for line in config:
+        addr = line.split('=')[0]
+        if addr == address:
+            return line.split('=')[1].strip()
+        
+    return False
+
+# Log
+print(f"{bcolors.OKBLUE}[I Receiver] Starting tokenizer{bcolors.ENDC}")
+
+# read from config file
+HEADER_LENGTH = int(get_config('HEADER_LENGTH'))
+
+IP = get_config('parser_IP')
+PORT = int(get_config('parser_PORT'))
+
+# Log
+print(f"{bcolors.OKBLUE}[I Receiver] Tokenizer starting at IP Address ({IP}) and Port Number ({PORT}) {bcolors.ENDC}")
+
+# startup settings
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.bind((IP, PORT))
+server_socket.listen()
+
+BUFFER_SIZE = 1000000
+
+
 
 def send_to_tokenizer(file_bytes):
     HEADER_SIZE = 10
@@ -25,36 +57,22 @@ def send_to_tokenizer(file_bytes):
 
     # TODO Read from config file
     # Parser IP and PORT
-    IP = "127.0.0.1"
-    PORT = 3421
+    IP = get_config("tokenizer_IP")
+    PORT = int(get_config('tokenizer_PORT'))
 
     tokenizer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     tokenizer_socket.connect((IP, PORT))
 
     # Log
-    print(f'{bcolors.OKBLUE}[I Parser] Sending file to the Parser...{bcolors.ENDC}')
+    print(f'{bcolors.OKBLUE}[I Parser] Sending file to the tokenizer...{bcolors.ENDC}')
     tokenizer_socket.send(sending_message)
     
     # Log
-    print(f'{bcolors.OKBLUE}[I Parser] file sent to the Parser!{bcolors.ENDC}')
+    print(f'{bcolors.OKBLUE}[I Parser] file sent to the tokenizer!{bcolors.ENDC}')
 
     # Ack
     result = tokenizer_socket.recv(100)
     print(f'{bcolors.OKBLUE}[I Parser]', result.decode('utf-8'), bcolors.ENDC)
-
-
-# TODO read from config file
-HEADER_LENGTH = 10
-
-IP = "127.0.0.1"
-PORT = 4123
-
-# startup settings
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind((IP, PORT))
-server_socket.listen()
-
-BUFFER_SIZE = 1000000
 
 
 def parsing(data):

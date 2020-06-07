@@ -66,7 +66,7 @@ def send_files(file_bytes):
     
     # set ip and port of the server receiver program
     IP = "127.0.0.1"
-    PORT = 1235
+    PORT = 1236
 
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((IP, PORT))

@@ -14,11 +14,30 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-# TODO Read from config file
-HEADER_LENGTH = 10
+def get_config(address):
+    config_file = open("./.config")
+    config = config_file.readlines()
+    config_file.close()
 
-IP = "127.0.0.1"
-PORT = 3421
+    for line in config:
+        addr = line.split('=')[0]
+        if addr == address:
+            return line.split('=')[1].strip()
+        
+    return False
+
+# TODO Read from config file
+print(f"{bcolors.OKBLUE}[I Receiver] Starting tokenizer{bcolors.ENDC}")
+
+# read from config file
+HEADER_LENGTH = int(get_config('HEADER_LENGTH'))
+
+IP = get_config('tokenizer_IP')
+PORT = int(get_config('tokenizer_PORT'))
+
+# Log
+print(f"{bcolors.OKBLUE}[I Receiver] Tokenizer starting at IP Address ({IP}) and Port Number ({PORT}) {bcolors.ENDC}")
+
 
 # startup settings
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -36,10 +55,9 @@ def send_to_analysis(file_bytes):
     # Log
     print(f"{bcolors.OKBLUE}[I Tokenizer] message: [|{header.decode('utf-8')}|{str(type(file_bytes))}] {bcolors.ENDC}")
 
-    # TODO Read from config file
-    # analyzer IP and PORT
-    IP = "127.0.0.1"
-    PORT = 7654
+    # Read analyzer IP and PORT from config file
+    IP = get_config('analyzer_IP')
+    PORT = int(get_config('analyzer_PORT'))
 
     analysis_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     analysis_socket.connect((IP, PORT))
@@ -72,8 +90,8 @@ def tokenize(parsed_dictionary):
     
     # TODO Read from config file
     # Connect to stop word
-    IP = "127.0.0.1"
-    PORT = 9876
+    IP = get_config("is_stop_IP")
+    PORT = int(get_config('is_stop_PORT'))
 
     is_stop_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     is_stop_socket.connect((IP, PORT))

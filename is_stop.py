@@ -15,10 +15,31 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
-HEADER_LENGTH = 10
 
-IP = "127.0.0.1"
-PORT = 9876
+def get_config(address):
+    config_file = open("./.config")
+    config = config_file.readlines()
+    config_file.close()
+
+    for line in config:
+        addr = line.split('=')[0]
+        if addr == address:
+            return line.split('=')[1].strip()
+        
+    return False
+
+# TODO Read from config file
+print(f"{bcolors.OKBLUE}[I Receiver] Starting is_stop{bcolors.ENDC}")
+
+# read from config file
+HEADER_LENGTH = int(get_config('HEADER_LENGTH'))
+
+IP = get_config('is_stop_IP')
+PORT = int(get_config('is_stop_PORT'))
+
+# Log
+print(f"{bcolors.OKBLUE}[I Receiver] Stop word checker starting at IP Address ({IP}) and Port Number ({PORT}) {bcolors.ENDC}")
+
 
 # startup settings
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

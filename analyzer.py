@@ -20,11 +20,33 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-HEADER_LENGTH = 10
 
-# this program IP and PORT numer
-IP = "127.0.0.1"
-PORT = 7654
+
+
+def get_config(address):
+    config_file = open("./.config")
+    config = config_file.readlines()
+    config_file.close()
+
+    for line in config:
+        addr = line.split('=')[0]
+        if addr == address:
+            return line.split('=')[1].strip()
+        
+    return False
+
+# TODO Read from config file
+print(f"{bcolors.OKBLUE}[I Receiver] Starting analyzer{bcolors.ENDC}")
+
+# read from config file
+HEADER_LENGTH = int(get_config('HEADER_LENGTH'))
+
+IP = get_config('analyzer_IP')
+PORT = int(get_config('analyzer_PORT'))
+
+# IP
+print(f"{bcolors.OKBLUE}[I Receiver] analyzer starting at IP Address ({IP}) and Port Number ({PORT}) {bcolors.ENDC}")
+
 
 # startup settings
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -37,13 +59,14 @@ def send_to_receiver(file_bytes):
     HEADER_SIZE = 10
     header = f"{len(file_bytes):^ {HEADER_SIZE}}".encode('utf-8')
     sending_message = header + file_bytes
-        # Log
+    
+    # Log
     print(f"{bcolors.OKBLUE}[I Analyzer] Analyzing finished{bcolors.ENDC}")
     print(f"{bcolors.OKBLUE}[I Analyzer] message: [|{header.decode('utf-8')}|{str(type(file_bytes))}]{bcolors.ENDC}")
 
-    # Parser IP and PORT
-    IP = "127.0.0.1"
-    PORT = 1239
+    # Receiver IP and PORT
+    IP = get_config("receiver_IP")
+    PORT = int(get_config('receiver_PORT2'))
 
     receiver_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     receiver_socket.connect((IP, PORT))

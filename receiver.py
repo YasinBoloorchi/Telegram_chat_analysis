@@ -16,11 +16,28 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-HEADER_LENGTH = 10
+def get_config(address):
+    config_file = open("./.config")
+    config = config_file.readlines()
+    config_file.close()
 
-# TODO read ip and port from config file
-IP = "127.0.0.1"
-PORT = 1235
+    for line in config:
+        addr = line.split('=')[0]
+        if addr == address:
+            return line.split('=')[1].strip()
+        
+    return False
+
+# Log
+print(f"{bcolors.OKBLUE}[I Receiver] Starting receiver{bcolors.ENDC}")
+
+# read ip and port from config file
+HEADER_LENGTH = int(get_config('HEADER_LENGTH'))
+IP = get_config('receiver_IP')
+PORT = int(get_config('receiver_PORT'))
+
+# Log
+print(f"{bcolors.OKBLUE}[I Receiver] Receiver starting at IP Address ({IP}) and Port Number ({PORT}) {bcolors.ENDC}")
 
 # startup settings
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -28,7 +45,11 @@ server_socket.bind((IP, PORT))
 server_socket.listen()
 
 # secont port connection for receiving from analyzer
-PORT2 = 1239
+PORT2 = int(get_config('receiver_PORT2'))
+
+# Log
+print(f"{bcolors.OKBLUE}[I Receiver] Receiver second Port Number: ({PORT2}) {bcolors.ENDC}")
+
 
 for_analyze_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 for_analyze_socket.bind((IP, PORT2))
@@ -44,10 +65,10 @@ def send_to_parser(file_bytes):
     # Log
     print(f"{bcolors.OKBLUE}[I Receiver] Message: [|{header.decode('utf-8')}|{str(type(file_bytes))}]{bcolors.ENDC}")
 
-    # TODO Read from config file
+    # Read from config file
     # Parser IP and PORT
-    IP = "127.0.0.1"
-    PORT = 4123
+    IP = get_config('parser_IP')
+    PORT = int(get_config('parser_PORT'))
 
     parser_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     parser_socket.connect((IP, PORT))
