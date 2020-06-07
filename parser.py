@@ -5,14 +5,25 @@ import pickle
 from bs4 import BeautifulSoup
 from datetime import datetime
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 
 def send_to_tokenizer(file_bytes):
     HEADER_SIZE = 10
     header = f"{len(file_bytes):^ {HEADER_SIZE}}".encode('utf-8')
     sending_message = header + file_bytes
 
-    print(f"message: [|{header.decode('utf-8')}|{str(type(file_bytes))}]")
+    print(f"{bcolors.OKBLUE}[I Parser] message: [|{header.decode('utf-8')}|{str(type(file_bytes))}]{bcolors.ENDC}")
 
+    # TODO Read from config file
     # Parser IP and PORT
     IP = "127.0.0.1"
     PORT = 3421
@@ -20,14 +31,19 @@ def send_to_tokenizer(file_bytes):
     tokenizer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     tokenizer_socket.connect((IP, PORT))
 
-    print('sending file to the Parser...')
+    # Log
+    print(f'{bcolors.OKBLUE}[I Parser] Sending file to the Parser...{bcolors.ENDC}')
     tokenizer_socket.send(sending_message)
-    print('file sent to the Parser!')
+    
+    # Log
+    print(f'{bcolors.OKBLUE}[I Parser] file sent to the Parser!{bcolors.ENDC}')
 
+    # Ack
     result = tokenizer_socket.recv(100)
-    print(result.decode('utf-8'))
+    print(f'{bcolors.OKBLUE}[I Parser]', result.decode('utf-8'), bcolors.ENDC)
 
 
+# TODO read from config file
 HEADER_LENGTH = 10
 
 IP = "127.0.0.1"
@@ -45,7 +61,7 @@ def parsing(data):
     msg_id = 1
     main_dict = {}
     
-    print(f"Parsing #{len(data)} File")
+    print(f"{bcolors.OKBLUE}[I Parser] Parsing #{len(data)} File {bcolors.ENDC}")
     for file in data:
         # for each file/list that we received we make 
         # an html file
@@ -89,10 +105,15 @@ def parsing(data):
 
 
 while True:
-    print('Parser is listening..')
-    receiver_socket, receiver_address = server_socket.accept()
-    print(f"Connection from {receiver_address} has been stablished!")
 
+    # Log
+    print(f'{bcolors.HEADER}[I Parser] Parser is listening..{bcolors.ENDC}')
+    
+    receiver_socket, receiver_address = server_socket.accept()
+    
+    # Log
+    print(f"{bcolors.OKGREEN}[I Parser] Connection from >>{receiver_address}<< (Receiver) has been stablished!{bcolors.ENDC}")
+    
     data = b''
     new_msg = True
 
@@ -100,32 +121,44 @@ while True:
         msg = receiver_socket.recv(BUFFER_SIZE)
 
         if new_msg:
-            print(f'New message receiving! | TIME: {datetime.now()}')
-            print(f'Message length: {msg[:HEADER_LENGTH].decode("utf-8")}')
+            print(f'{bcolors.OKBLUE}[I Parser] New message receiving! | TIME: {datetime.now()}{bcolors.ENDC}')
+            print(f'{bcolors.OKBLUE}[I Parser] Message length: {msg[:HEADER_LENGTH].decode("utf-8")}{bcolors.ENDC}')
             msglen = int(msg[:HEADER_LENGTH])
             new_msg = False
     
         data += msg
 
         if len(data) - HEADER_LENGTH == msglen:
-            print("Message received completely")
+            
+            # Log
+            print(f"{bcolors.OKGREEN}[I Parser] Message received completely{bcolors.ENDC}")
+            
             data = data[HEADER_LENGTH:]
+
+            # Ack
             receiver_socket.send(b'Parser received the file!')
             break
     
-
-    # print(type(data))
     data = pickle.loads(data)
     
-    print('data class: ',type(data), '-- data length:' ,len(data))
+    # Log
+    print(f'{bcolors.OKBLUE}[I Parser] List length : {len(data)} {bcolors.ENDC}')
 
-    # TODO 
     # Pars File
-    print("Start parsing the Files")
-    parsed_data = parsing(data)
-    print(f'Parsing Completed\nParsed file length: {len(parsed_data)} | TIME: {datetime.now()}')
+    
+    # Log
+    print(f"{bcolors.OKBLUE}[I Parser] parsing the Files {bcolors.ENDC}")
 
-    # TODO 
+    parsed_data = parsing(data)
+
+    # Log
+    print(f'{bcolors.OKBLUE}[I Parser] Parsing Completed. Parsed file length: {len(parsed_data)} | TIME: {datetime.now()}{bcolors.ENDC}')
+
+
     # send file to the tokenizer
+    
+    # Log
+    print(f"{bcolors.OKBLUE}[I Parser] Sending file to tokenizer {bcolors.ENDC}")
+    
     parsed_data_bytes = pickle.dumps(parsed_data)
     send_to_tokenizer(parsed_data_bytes)

@@ -117,8 +117,8 @@ def send_files(file_bytes):
     return pickle.loads(data)
 
 
-path = input(f"{bcolors.HEADER}Enter the Telegram chats exported directory: {bcolors.ENDC}")
-
+# path = input(f"{bcolors.HEADER}Enter the Telegram chats exported directory: {bcolors.ENDC}")
+path = '/home/hakim/server_chat'
 # get all files addresses in a list
 addresses = get_files_address(path)
 

@@ -9,6 +9,17 @@ import matplotlib.pyplot as plt
 import pickle
 from datetime import datetime
 
+# Color for LOGs
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 HEADER_LENGTH = 10
 
 # this program IP and PORT numer
@@ -26,8 +37,9 @@ def send_to_receiver(file_bytes):
     HEADER_SIZE = 10
     header = f"{len(file_bytes):^ {HEADER_SIZE}}".encode('utf-8')
     sending_message = header + file_bytes
-
-    print(f"message: [|{header.decode('utf-8')}|{str(type(file_bytes))}]")
+        # Log
+    print(f"{bcolors.OKBLUE}[I Analyzer] Analyzing finished{bcolors.ENDC}")
+    print(f"{bcolors.OKBLUE}[I Analyzer] message: [|{header.decode('utf-8')}|{str(type(file_bytes))}]{bcolors.ENDC}")
 
     # Parser IP and PORT
     IP = "127.0.0.1"
@@ -36,9 +48,12 @@ def send_to_receiver(file_bytes):
     receiver_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     receiver_socket.connect((IP, PORT))
 
-    print('sending file to the receiver...')
+    # Log
+    print(f"{bcolors.OKBLUE}[I Analyzer] Sending result to receiver{bcolors.ENDC}")    
+
     receiver_socket.send(sending_message)
-    print('file sent to the receiver')
+    
+    print(f"{bcolors.OKBLUE}[I Analyzer] Result sent to receiver{bcolors.ENDC}")    
 
 
 def analyze(inv_indx, doc_info):
@@ -110,11 +125,15 @@ def analyze(inv_indx, doc_info):
     return plot_img_pick
 
 
-
 while True:
-    print('Analyizer is listening..')
+    
+    # Log
+    print(f'{bcolors.HEADER}[I Analyzer] Analyizer is listening...{bcolors.ENDC}')
+
     client_socket, client_address = server_socket.accept()
-    print(f"Connection from {client_address} has been stablished!")
+
+    # Log
+    print(f"{bcolors.OKGREEN}[I Analyzer] Connection from >>{client_address}<< has been stablished!{bcolors.ENDC}")
 
     data = b''
     new_msg = True
@@ -123,20 +142,25 @@ while True:
         msg = client_socket.recv(BUFFER_SIZE)
 
         if new_msg:
-            print(f'New message receiving! | TIME: {datetime.now()}')
-            print(f'new message length: {msg[:HEADER_LENGTH].decode("utf-8")}')
+            
+            # Log
+            print(f'{bcolors.OKBLUE}[I Analyzer] New message receiving! | TIME: {datetime.now()}{bcolors.ENDC}')
+            print(f'{bcolors.OKBLUE}[I Analyzer] Message length: {msg[:HEADER_LENGTH].decode("utf-8")}{bcolors.ENDC}')
+
             msglen = int(msg[:HEADER_LENGTH])
             new_msg = False
     
         data += msg
 
         if len(data) - HEADER_LENGTH == msglen:
-            print("Message received completely")
+
+            # Log
+            print(f"{bcolors.OKBLUE}[I Analyzer] Message received completely{bcolors.ENDC}")
+
             data = data[HEADER_LENGTH:]
             client_socket.send(b'Files received!')
             break
     
-    # send data to the parser
     data = pickle.loads(data)
 
     invert_index = data[0]
@@ -154,13 +178,16 @@ while True:
 
 
     # send the data to the analyze function and get the results
+    
+    # Log
+    print(f"{bcolors.OKBLUE}[I Analyzer] Start analyzing {bcolors.ENDC}")
+    
     analysis_res = analyze(invert_index, doc_info)
-    print(len(analysis_res))
-    print(pickle.loads(analysis_res))
 
     if analysis_res:
-        print('Inver index has been analyzed!')
-    
-    # TODO
-    # send the result to the receiver
-    send_to_receiver(analysis_res)
+        # Log
+        print(f"{bcolors.OKGREEN}[I Analyzer] Analyzing finished{bcolors.ENDC}")
+        print(f"{bcolors.OKBLUE}[I Analyzer] Result size {len(analysis_res)}{bcolors.ENDC}")
+        
+        # send the result to the receiver
+        send_to_receiver(analysis_res)
